@@ -1,12 +1,14 @@
-<div class="flex-container">
+<div class="flex-container direction">
   <div class="normal-margin">
     <textarea ng-model="input"></textarea>
   </div>
-  <div class="normal-margin button-flex-container">
-    <button type="button" class="btn btn-primary normal-margin" ng-click="parseData(input)">Parse Data</button>
-    <button type="button" class="btn btn-primary normal-margin" ng-click="logout(input)">Logout</button>
+  <div class="normal-margin">
+    <button type="button" class="btn btn-primary customButton" ng-click="parseData(input)">Parse Data</button>
   </div>
   <div class="normal-margin">
     <svg graph data="graphData"></svg>
   </div>
+</div>
+<div class="sticky-footer">
+  <i>(c) Cerenode Inc. 2018</i>
 </div>
