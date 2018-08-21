@@ -1,0 +1,12 @@
+<div class="flex-container">
+  <div class="normal-margin">
+    <textarea ng-model="input"></textarea>
+  </div>
+  <div class="normal-margin button-flex-container">
+    <button type="button" class="btn btn-primary normal-margin" ng-click="parseData(input)">Parse Data</button>
+    <button type="button" class="btn btn-primary normal-margin" ng-click="logout(input)">Logout</button>
+  </div>
+  <div class="normal-margin">
+    <svg graph data="graphData"></svg>
+  </div>
+</div>

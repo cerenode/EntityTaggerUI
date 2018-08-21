@@ -1,0 +1,40 @@
+/* app css stylesheet */
+
+textarea {
+  width: 45vw;
+  height: 95vh;
+}
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+}
+
+.button-flex-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.normal-margin {
+  margin-left: 10px;
+  margin-right: 5px;
+  margin-top: 10px;
+}
+
+svg {
+  border-width: 1px;
+  border-style: solid;
+  width: 45vw;
+  height: 95vh;
+}
