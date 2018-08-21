@@ -9,9 +9,12 @@ angular.module('myApp.home', ['ngRoute'])
   });
 }])
 
-.controller('HomeCtrl', ['$scope', 'LoginService', function($scope, LoginService) {
+.controller('HomeCtrl', ['$scope', 'LoginService', 'ApiService', function($scope, LoginService, ApiService) {
   $scope.parseData = function(data) {
     console.log(data);
+    ApiService.getEntities(data).then(function(data) {
+      console.log('data ivdem vanne');
+    });
   };
 
   $scope.graphData = {
@@ -23,10 +26,24 @@ angular.module('myApp.home', ['ngRoute'])
       {source: '1', target: '2', value: '10'}
     ]
   };
+}])
 
-  $scope.logout = function() {
-    LoginService.logout();
-  };
+.factory('ApiService', ['$http', function($http) {
+  return {
+    getEntities: function(postData) {
+      $http({
+        url: 'http://213.239.219.235:9000/api/entities',
+        // url: 'http://localhost:9000/api/entities',
+        method: 'POST',
+        data: postData,
+        headers: {'Content-Type': 'application/json'}
+      }).then(function (data) {
+        console.log('data vanne');
+        console.log(data);
+        return data;
+      });
+    }
+  }
 }])
 
 .directive('graph', [function() {

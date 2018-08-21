@@ -57,4 +57,12 @@ angular.module('myApp.login', ['ngRoute'])
   $scope.login = function(user) {
     LoginService.login(user);
   };
+
+  $scope.isLoggedIn = function() {
+    return LoginService.isLogged();
+  };
+
+  $scope.logout = function() {
+    LoginService.logout();
+  };
 }]);

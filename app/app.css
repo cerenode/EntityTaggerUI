@@ -1,8 +1,13 @@
 /* app css stylesheet */
 
+footer {
+  position: absolute;
+  bottom: 0;
+}
+
 textarea {
   width: 45vw;
-  height: 95vh;
+  height: 85vh;
 }
 
 .links line {
@@ -36,5 +41,5 @@ svg {
   border-width: 1px;
   border-style: solid;
   width: 45vw;
-  height: 95vh;
+  height: 85vh;
 }
