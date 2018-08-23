@@ -94,8 +94,13 @@ angular.module('myApp.home', ['ngRoute'])
     scope.render = function(data) {
       if(i > 0) {
         d3.selectAll("svg > *").remove();
+<<<<<<< HEAD
         var width = el[0].clientWidth;
         var height = el[0].clientHeight;
+=======
+        var width = 1380;
+        var height = 800;
+>>>>>>> 66e9e8989969ae074b0556070b119ba1766a94f5
         var clicked = "";
 
         var color = d3.scale.category20();
@@ -115,8 +120,14 @@ angular.module('myApp.home', ['ngRoute'])
         tree.size([width, height])
           .nodes(graph.nodes)
           .links(graph.links)
+<<<<<<< HEAD
           .charge(-300)
           .distance(100)
+=======
+          .charge(-100)
+          .gravity(0.015)
+          .distance(50)
+>>>>>>> 66e9e8989969ae074b0556070b119ba1766a94f5
           .start();
 
         var schema = d3.select("svg")
