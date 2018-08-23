@@ -12,12 +12,38 @@ angular.module('myApp.home', ['ngRoute'])
 .controller('HomeCtrl', ['$scope', 'ApiService', function($scope, ApiService) {
   $scope.graphData = {};
 
+  function getConceptWiseData(data) {
+    var cons = [];
+    Object.values(data).forEach(function(arr) {
+      cons = cons.concat(arr) ;
+    });
+    $scope.concepts = [];
+    var uniqueCons = {};
+    cons.filter(function(item, pos) {
+      return cons.indexOf(item) == pos;
+    }).forEach(function(c) {
+      $scope.concepts.push(c);
+      uniqueCons[c] = [];
+    });
+    Object.keys(data).forEach(function(entity) {
+      data[entity].forEach(function(con) {
+        uniqueCons[con].push(entity);
+      });
+    });
+    return uniqueCons;
+  }
+
+  $scope.csvForm = function(arr) {
+    return arr.join(', ');
+  };
+
   $scope.parseData = function(data) {
     console.log(data);
     ApiService.getEntities(data).then(function (data) {
       var nodes = ApiService.createD3Json(data.data.result);
       $scope.graphData = { nodes: nodes, links: [] };
       console.log($scope.graphData);
+      $scope.conceptData = getConceptWiseData(data.data.result);
     });
   };
 }])
@@ -68,8 +94,8 @@ angular.module('myApp.home', ['ngRoute'])
     scope.render = function(data) {
       if(i > 0) {
         d3.selectAll("svg > *").remove();
-        var width = 1135;
-        var height = 800;
+        var width = el[0].clientWidth;
+        var height = el[0].clientHeight;
         var clicked = "";
 
         var color = d3.scale.category20();
@@ -89,8 +115,7 @@ angular.module('myApp.home', ['ngRoute'])
         tree.size([width, height])
           .nodes(graph.nodes)
           .links(graph.links)
-          .charge(-100)
-          .gravity(0.01)
+          .charge(-300)
           .distance(100)
           .start();
 
@@ -115,7 +140,7 @@ angular.module('myApp.home', ['ngRoute'])
 
         var node = gnodes.append("circle")
           .attr("class", "node")
-          .attr("r", function(d) { return d.label.length * 5; })
+          .attr("r", function(d) { return 30; })
           .style("fill", function(d) { return color(d.group);})
           .append("svg:title")
           .call(drag);
@@ -123,7 +148,6 @@ angular.module('myApp.home', ['ngRoute'])
         gnodes.on("mouseout",function(){
           d3.select("body").select('div.tooltip').remove();
         });
-
 
         var labels = gnodes.append("text")
           .attr("dy", ".35em")
@@ -148,7 +172,7 @@ angular.module('myApp.home', ['ngRoute'])
             .attr("transform", function(d, i) { return "translate(0," + i * 25 + ")"; });
 
         legend.append("rect")
-            .attr("x", width - 18)
+            .attr("x", 200)
             .attr("y", 10)
             .attr("width", 18)
             .attr("height", 18)
@@ -168,7 +192,7 @@ angular.module('myApp.home', ['ngRoute'])
             }) ;
 
         legend.append("text")
-            .attr("x", width - 24)
+            .attr("x", 192)
             .attr("y", 19)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
@@ -178,6 +202,44 @@ angular.module('myApp.home', ['ngRoute'])
           d3.event.sourceEvent.stopPropagation();
           d.fixed = true;
         }
+        /*
+
+        var nominal_base_node_size = 8;
+        var nominal_text_size = 10;
+        var max_text_size = 24;
+        var nominal_stroke = 1.5;
+        var max_stroke = 4.5;
+        var max_base_node_size = 36;
+
+        zoom.on("zoom", function () {
+          var stroke = nominal_stroke;
+          if (nominal_stroke * zoom.scale() > max_stroke) stroke = max_stroke / zoom.scale();
+          link.style("stroke-width", stroke);
+          circle.style("stroke-width", stroke);
+          
+          var base_radius = nominal_base_node_size;
+          if (nominal_base_node_size * zoom.scale() > max_base_node_size) base_radius = max_base_node_size / zoom.scale();
+          circle.attr("d", d3.svg.symbol()
+          .size(function (d) {
+            return Math.PI * Math.pow(size(d.size) * base_radius / nominal_base_node_size || base_radius, 2);
+          })
+          .type(function (d) {
+            return d.type;
+          }))
+          
+          if (!text_center) text.attr("dx", function (d) {
+            return (size(d.size) * base_radius / nominal_base_node_size || base_radius);
+          });
+          
+          var text_size = nominal_text_size;
+          if (nominal_text_size * zoom.scale() > max_text_size) text_size = max_text_size / zoom.scale();
+          text.style("font-size", text_size + "px");
+          
+          g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        });
+
+        svg.call(zoom);
+        */
       }
     };
 

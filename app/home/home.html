@@ -6,6 +6,24 @@
     <button type="button" class="btn btn-primary customButton" ng-click="parseData(input)">Parse Data</button>
   </div>
   <div class="normal-margin">
+    <div class="accordion" id="accordionExample">
+      <div class="card" ng-repeat="con in concepts">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#{{con}}" aria-controls="{{con]}">
+              {{con}}
+            </button>
+          </h5>
+        </div>
+        <div id="{{con}}" class="collapse" data-parent="#accordionExample">
+          <div class="card-body">
+            {{csvForm(conceptData[con])}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="normal-margin">
     <svg graph data="graphData"></svg>
   </div>
 </div>
