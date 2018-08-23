@@ -10,116 +10,149 @@ angular.module('myApp.home', ['ngRoute'])
 }])
 
 .controller('HomeCtrl', ['$scope', 'LoginService', 'ApiService', function($scope, LoginService, ApiService) {
+  $scope.graphData = {};
+
   $scope.parseData = function(data) {
     console.log(data);
-    ApiService.getEntities(data).then(function(data) {
-      console.log('data ivdem vanne');
+    ApiService.getEntities(data).then(function (data) {
+      var nodes = ApiService.createD3Json(data.data.result);
+      $scope.graphData = { nodes: nodes, links: [] };
+      console.log($scope.graphData);
     });
-  };
-
-  $scope.graphData = {
-    nodes: [
-      {id: '1', group: '1'},
-      {id: '2', group: '2'}
-    ],
-    links: [
-      {source: '1', target: '2', value: '10'}
-    ]
   };
 }])
 
 .factory('ApiService', ['$http', function($http) {
+
+  function findNextId(key, nodes) {
+    var j = 0;
+    for(var i = 0; i < nodes.length; i++) {
+      if(nodes[i].label === key) {
+        j++;
+      }
+    }
+    return j;
+  }
+
   return {
     getEntities: function(postData) {
-      $http({
+      return $http({
         url: 'http://213.239.219.235:9000/api/entities',
         // url: 'http://localhost:9000/api/entities',
         method: 'POST',
         data: postData,
-        headers: {'Content-Type': 'application/json'}
-      }).then(function (data) {
-        console.log('data vanne');
-        console.log(data);
-        return data;
+        headers: {'Content-Type': 'text/plain'}
       });
+    },
+    createD3Json: function (data) {
+      var nodes = [];
+      Object.keys(data).forEach(function(key) {
+        data[key].forEach(function(concept) {
+          var obj = {
+            id: findNextId(key, nodes),
+            label: key,
+            group: concept
+          };
+          nodes.push(obj);
+        });
+      });
+      return nodes;
     }
   }
 }])
 
 .directive('graph', [function() {
   function link(scope, el) {
-    var el = el[0];
-    console.log(el);
-    var svg = d3.select(el).append("svg"),
-        width = el.clientWidth,
-        height = el.clientHeight;
+    var i = -1;
 
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
+    scope.render = function(data) {
+      if(i > 0) {
+        d3.selectAll("svg > *").remove();
+        var width = 1135;
+        var height = 800;
 
-    var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function(d) { return d.id; }))
-        .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(width / 2, height / 2));
+        var color = d3.scale.category20();
 
-    var graph = scope.data;
+        var tree = d3.layout.force();
+        var drag = tree.drag()
+          .origin(function(d) { return d; })
+          .on("dragstart", dragstarted);          
 
-    var link = svg.append("g")
-        .attr("class", "links")
-      .selectAll("line")
-      .data(graph.links)
-      .enter().append("line")
-        .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+        var graph = data;
+        console.log(data);
 
-    var node = svg.append("g")
-        .attr("class", "nodes")
-      .selectAll("circle")
-      .data(graph.nodes)
-      .enter().append("circle")
-        .attr("r", 5)
-        .attr("fill", function(d) { return color(d.group); })
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
+        var svg = d3.select(el[0]).append("svg")
+          .attr("width", width)
+          .attr("height", height);
+        
+        tree.size([width, height])
+          .nodes(graph.nodes)
+          .links(graph.links)
+          .charge(-100)
+          .gravity(0.01)
+          .distance(100)
+          .start();
 
-    node.append("title")
-        .text(function(d) { return d.id; });
+        var schema = d3.select("svg")
+          .append('g');
 
-    simulation
-        .nodes(graph.nodes)
-        .on("tick", ticked);
+        var link = schema.selectAll(".link")
+          .data(graph.links)
+          .enter().append("line")
+          .attr("class", "link")
+          .style("stroke","#CCC")
+          .style("stroke-width", function (d) {
+            return Math.sqrt(d.value);
+          });
 
-    simulation.force("link")
-        .links(graph.links);
+        var gnodes = schema.selectAll('g.gnode')
+          .data(graph.nodes)
+          .enter()
+          .append('g')
+          .classed('gnode', true)
+          .call(tree.drag);
 
-    function ticked() {
-      link
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
+        var node = gnodes.append("circle")
+          .attr("class", "node")
+          .attr("r", function(d) { return d.label.length * 5; })
+          .style("fill", function(d) { return color(d.group);})
+          .append("svg:title")
+          .call(drag);
 
-      node
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
-    }
+        gnodes.on("mouseout",function(){
+          d3.select("body").select('div.tooltip').remove();
+        });
 
-    function dragstarted(d) {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
 
-    function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
+        var labels = gnodes.append("text")
+          .attr("dy", ".35em")
+          .attr("text-anchor", "middle")
+          .text(function(d) { return d.label; });
 
-    function dragended(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
+        tree.on("tick", function() {
+          link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+          
+          gnodes.attr("transform", function(d) {
+            return 'translate(' + [d.x, d.y] + ')';
+          });
+        });
+
+        function dragstarted(d) {
+          d3.event.sourceEvent.stopPropagation();
+          d.fixed = true;
+        }
+      }
+    };
+
+    scope.$watch(function(scope) {
+      return scope.$parent.graphData;
+    } , function(newVal, oldVal) {
+      i = i + 1;
+      scope.render(newVal);
+    }, true);
   }
 
   return {
