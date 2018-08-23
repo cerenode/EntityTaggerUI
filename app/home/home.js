@@ -172,7 +172,7 @@ angular.module('myApp.home', ['ngRoute'])
             .attr("transform", function(d, i) { return "translate(0," + i * 25 + ")"; });
 
         legend.append("rect")
-            .attr("x", 200)
+            .attr("x", 20)
             .attr("y", 10)
             .attr("width", 18)
             .attr("height", 18)
@@ -192,10 +192,10 @@ angular.module('myApp.home', ['ngRoute'])
             }) ;
 
         legend.append("text")
-            .attr("x", 192)
+            .attr("x", 40)
             .attr("y", 19)
             .attr("dy", ".35em")
-            .style("text-anchor", "end")
+            .style("text-anchor", "start")
             .text(function(d) { return d; });
 
         function dragstarted(d) {
