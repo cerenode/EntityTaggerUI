@@ -68,7 +68,7 @@ angular.module('myApp.home', ['ngRoute'])
     scope.render = function(data) {
       if(i > 0) {
         d3.selectAll("svg > *").remove();
-        var width = 1135;
+        var width = 1380;
         var height = 800;
         var clicked = "";
 
@@ -90,8 +90,8 @@ angular.module('myApp.home', ['ngRoute'])
           .nodes(graph.nodes)
           .links(graph.links)
           .charge(-100)
-          .gravity(0.01)
-          .distance(100)
+          .gravity(0.015)
+          .distance(50)
           .start();
 
         var schema = d3.select("svg")
