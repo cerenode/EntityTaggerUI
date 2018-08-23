@@ -9,7 +9,7 @@ angular.module('myApp.home', ['ngRoute'])
   });
 }])
 
-.controller('HomeCtrl', ['$scope', 'LoginService', 'ApiService', function($scope, LoginService, ApiService) {
+.controller('HomeCtrl', ['$scope', 'ApiService', function($scope, ApiService) {
   $scope.graphData = {};
 
   $scope.parseData = function(data) {
@@ -70,6 +70,7 @@ angular.module('myApp.home', ['ngRoute'])
         d3.selectAll("svg > *").remove();
         var width = 1135;
         var height = 800;
+        var clicked = "";
 
         var color = d3.scale.category20();
 
@@ -144,23 +145,34 @@ angular.module('myApp.home', ['ngRoute'])
             .data(color.domain())
             .enter().append("g")
             .attr("class", "legend")
-            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+            .attr("transform", function(d, i) { return "translate(0," + i * 25 + ")"; });
 
         legend.append("rect")
             .attr("x", width - 18)
+            .attr("y", 10)
             .attr("width", 18)
             .attr("height", 18)
-            .style("fill", color);
+            .style("fill", color)
+            .on("click", function(d) {
+              console.log(d);
+              d3.selectAll(".gnode").style("opacity",1);
+   
+              if (clicked !== d) {
+                d3.selectAll(".gnode").filter(function(e) {
+                  return e.group !== d;
+                }).style("opacity", 0.1);
+                clicked = d;
+              } else {
+                clicked = "";
+              }
+            }) ;
 
         legend.append("text")
             .attr("x", width - 24)
-            .attr("y", 9)
+            .attr("y", 19)
             .attr("dy", ".35em")
             .style("text-anchor", "end")
             .text(function(d) { return d; });
-
-
-
 
         function dragstarted(d) {
           d3.event.sourceEvent.stopPropagation();
